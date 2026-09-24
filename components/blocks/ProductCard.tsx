@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Sunburst from '@/components/ui/Sunburst'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getImageUrl, getAltText } from '../../lib/imageHelpers'
@@ -114,19 +115,20 @@ export function ProductCard({
     <Link href={productHref} className="group block h-full">
       <div className="relative h-full flex flex-col bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-lg transition-all duration-300 hover:border-brand-primary hover:shadow-2xl hover:-translate-y-1">
         {/* IMAGE */}
-        <div className="relative aspect-[4/3] bg-gray-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-[4/3] overflow-hidden flex items-center justify-center">
+          <Sunburst tone="light" />
           {image ? (
             <Image
               src={getImageUrl(image, { width: 800, fit: 'max' }) || ''}
               alt={getAltText(image, displayTitle)}
               fill
-              className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
+              className="relative object-contain p-5 drop-shadow-[0_14px_16px_rgba(36,30,58,0.28)] transition-transform duration-700 group-hover:scale-105"
               priority={priority} // Use priority prop for above-the-fold images
               loading={priority ? 'eager' : 'lazy'}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-400">
+            <div className="relative w-full h-full flex items-center justify-center text-slate-400">
               No Image
             </div>
           )}

@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Sunburst from '@/components/ui/Sunburst'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getImageUrl, getBlurDataURL } from '@/lib/imageHelpers'
 import {
@@ -174,7 +175,7 @@ export default function HeroProduct({
 
   return (
     <>
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-black">
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-brand-ink">
         {confettiConfig.generate && (
           <div className="absolute inset-0 z-[5] pointer-events-none">
             <Suspense fallback={null}>
@@ -212,9 +213,8 @@ export default function HeroProduct({
               />
             </motion.div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-br from-black via-black/90 to-black/70" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/30" />
+          {/* Retro sunburst in the theme colors (follows campaign takeovers) */}
+          <Sunburst tone="dark" origin="50% 62%" rays={18} spin />
           <motion.div
             animate={{
               scale: [1, 1.2, 1],
@@ -281,7 +281,7 @@ export default function HeroProduct({
                   duration: 1.2,
                   ease: 'easeOut',
                 }}
-                className="relative z-20 pointer-events-none flex justify-center w-full -my-8"
+                className="relative z-20 pointer-events-none flex justify-center w-full mt-6"
               >
                 <div className="relative w-full h-[35vh] md:h-[40vh] max-w-4xl max-h-[500px]">
                   <Image
@@ -293,7 +293,7 @@ export default function HeroProduct({
                     }
                     alt={productImage.alt || displayTitle}
                     fill
-                    className="object-contain drop-shadow-[0_0_150px_rgba(255,107,0,0.4)] filter"
+                    className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.45)]"
                     sizes="(max-width: 768px) 95vw, 85vw"
                     priority
                   />

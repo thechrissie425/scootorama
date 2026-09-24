@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import Sunburst from '@/components/ui/Sunburst'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDownIcon } from '@sanity/icons'
 import { BrandButton } from '@/components/ui/BrandButtons'
@@ -474,12 +475,13 @@ export default function Header({
                           onClick={() => setHoveredIndex(null)}
                           className="block w-full aspect-[4/3] relative group/card overflow-hidden rounded-[24px]"
                         >
+                          <Sunburst tone="dark" origin="50% 40%" />
                           <Image
                             src={urlFor(
                               navItems[hoveredIndex].featuredCard!.image
                             )
                               .width(800)
-                              .height(600)
+                              .fit('max')
                               .url()}
                             alt={
                               navItems[hoveredIndex].featuredCard!.heading ||
@@ -487,11 +489,11 @@ export default function Header({
                             }
                             fill
                             sizes="400px"
-                            className="object-cover transition-transform duration-700 group-hover/card:scale-105"
+                            className="object-contain object-top p-5 pb-24 drop-shadow-[0_16px_20px_rgba(0,0,0,0.4)] transition-transform duration-700 group-hover/card:scale-105"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                          <div className="absolute inset-0 flex flex-col justify-end p-8">
-                            <h3 className="text-white text-3xl font-display leading-tight mb-3 drop-shadow-md">
+                          <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/90 via-transparent to-transparent" />
+                          <div className="absolute inset-0 flex flex-col justify-end p-5">
+                            <h3 className="text-white text-xl font-display leading-tight mb-2 drop-shadow-md">
                               {navItems[hoveredIndex].featuredCard!.heading}
                             </h3>
                             <span className="inline-flex items-center text-white/90 font-heading-bold text-sm tracking-wide uppercase group-hover/card:text-white transition-colors">
