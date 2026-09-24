@@ -136,7 +136,7 @@ export default function Hero({
   return (
     <section
       className={cn(
-        'relative h-[90vh] min-h-[600px] flex text-white bg-black overflow-hidden',
+        'relative h-svh min-h-[600px] flex text-white bg-black overflow-hidden',
         layoutClasses,
         theme === 'dark' ? 'bg-gray-900' : 'bg-black'
       )}
@@ -156,8 +156,10 @@ export default function Hero({
               'object-cover',
               // The default art keeps its left side calm for the copy; on
               // narrow screens, where copy spans the width, show that side.
-              // Campaign key art is centered as designed.
-              !takeoverArt?.asset && 'object-[20%_center] md:object-center'
+              // It's anchored to the bottom so short, wide windows crop
+              // empty sky rather than the road and scooter. Campaign key art
+              // is centered as designed.
+              !takeoverArt?.asset && 'object-[20%_100%] md:object-bottom'
             )}
             priority={priority === 'high'}
             sizes="100vw"

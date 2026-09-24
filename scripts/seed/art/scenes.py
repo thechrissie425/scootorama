@@ -387,10 +387,11 @@ def home_hero():
     b += f'<rect x="{cx_ - 7}" y="{y - 60}" width="14" height="60" {o(TEAL)}/><path d="M{cx_},{y - 100} q-16,20 0,38 q16,-18 0,-38 Z" {o(ORANGE)}/>'
     # palms (Bora Bora Bungalow Bay)
     b += palm(2290, ground, 1.45, -34) + palm(2120, ground, 1.05, 22)
-    # saucer with tractor beam (Roswell Saucer Speedway)
-    b += f'<path d="M1990,610 L1900,860 L2120,860 L2050,610 Z" fill="#E8FF8A" opacity=".28"/>'
-    b += f'<ellipse cx="2020" cy="560" rx="80" ry="62" {o(TEAL_L)}/><ellipse cx="2020" cy="585" rx="195" ry="48" {o("#C9CCD8")}/>'
-    b += ''.join(f'<circle cx="{1885 + k * 54}" cy="590" r="11" {o([YELLOW, PINK_L, LIME][k % 3])}/>' for k in range(6))
+    # saucer beaming up the sun (Roswell Saucer Speedway); kept low enough to
+    # survive the top crop on short, wide windows
+    b += f'<path d="M1990,770 L1920,{sy - 240} L2080,{sy - 240} L2050,770 Z" fill="#E8FF8A" opacity=".28"/>'
+    b += f'<ellipse cx="2020" cy="715" rx="80" ry="62" {o(TEAL_L)}/><ellipse cx="2020" cy="740" rx="195" ry="48" {o("#C9CCD8")}/>'
+    b += ''.join(f'<circle cx="{1885 + k * 54}" cy="745" r="11" {o([YELLOW, PINK_L, LIME][k % 3])}/>' for k in range(6))
     # dino peeking in (Dino Detour)
     dx = 1500
     b += (f'<path d="M{dx},{ground} Q{dx + 20},{ground - 130} {dx + 150},{ground - 130} Q{dx + 250},{ground - 130} {dx + 280},{ground - 45} '
