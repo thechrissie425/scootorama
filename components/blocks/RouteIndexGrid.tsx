@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { urlFor } from '@/sanity/lib/image'
@@ -125,6 +125,22 @@ export default function RouteIndexGrid({
   language: _language = 'en',
 }: RouteIndexGridProps) {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
+
+  // While the route modal is open: Escape closes it and the page behind
+  // doesn't scroll.
+  useEffect(() => {
+    if (!selectedRoute) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedRoute(null)
+    }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [selectedRoute])
   const [filterWorld, setFilterWorld] = useState<string>('all')
   const [filterSport, setFilterSport] = useState<string>('all')
   const { formatDistance, market: marketConfig } = useMarketFormatting()
@@ -363,180 +379,189 @@ export default function RouteIndexGrid({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedRoute(null)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
             />
 
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 50 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-4xl md:max-h-[90vh] bg-darkGrey rounded-3xl overflow-hidden shadow-2xl z-50 flex flex-col"
+            {/* Modal: centered by a flex wrapper, because framer-motion owns
+                the element's transform (a translate-based center gets overwritten) */}
+            <div
+              className="fixed inset-0 z-[101] flex items-center justify-center p-4 md:p-8 pointer-events-none"
+              role="dialog"
+              aria-modal="true"
+              aria-label={selectedRoute.name}
             >
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedRoute(null)}
-                className="absolute top-6 right-6 z-10 p-3 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full transition-colors"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94, y: 24 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.94, y: 24 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="pointer-events-auto relative w-full max-w-4xl max-h-[90vh] bg-darkGrey rounded-3xl overflow-hidden shadow-2xl flex flex-col"
               >
-                <SvgIcon src={closeIcon} className="w-6 h-6 text-white" />
-              </button>
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedRoute(null)}
+                  aria-label="Close"
+                  className="absolute top-6 right-6 z-10 p-3 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full transition-colors"
+                >
+                  <SvgIcon src={closeIcon} className="w-6 h-6 text-white" />
+                </button>
 
-              {/* Scrollable Content */}
-              <div className="overflow-y-auto flex-1">
-                {/* Hero Section */}
-                <div className="relative h-80 bg-gradient-to-b from-black/60 to-black/90">
-                  {selectedRoute.imageUrl || selectedRoute.heroImage ? (
-                    <Image
-                      src={
-                        selectedRoute.imageUrl ||
-                        urlFor(selectedRoute.heroImage).width(1200).url()
-                      }
-                      alt={selectedRoute.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1200px) 100vw, 1200px"
-                      priority
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <SvgIcon
-                        src={pinIcon}
-                        className="w-32 h-32 text-brandWhite/10"
+                {/* Scrollable Content */}
+                <div className="overflow-y-auto flex-1">
+                  {/* Hero Section */}
+                  <div className="relative h-56 md:h-80 bg-gradient-to-b from-black/60 to-black/90">
+                    {selectedRoute.imageUrl || selectedRoute.heroImage ? (
+                      <Image
+                        src={
+                          selectedRoute.imageUrl ||
+                          urlFor(selectedRoute.heroImage).width(1200).url()
+                        }
+                        alt={selectedRoute.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 1200px) 100vw, 1200px"
+                        priority
                       />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-darkGrey via-transparent to-transparent" />
-
-                  {/* Title Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-8">
-                    <div className="flex items-center gap-3 mb-3">
-                      {selectedRoute.featured && (
-                        <div className="bg-brand-primary px-3 py-1.5 rounded-full flex items-center gap-2">
-                          <SvgIcon
-                            src={starIcon}
-                            className="w-4 h-4 text-white"
-                          />
-                          <span className="text-white font-display text-xs uppercase">
-                            Featured
-                          </span>
-                        </div>
-                      )}
-                      <span className="text-lightGrey-dark font-numeral text-sm uppercase tracking-widest">
-                        {RIDE_MODE_LABELS[selectedRoute.sportType]}
-                      </span>
-                    </div>
-                    <h2 className="font-display text-5xl text-brandWhite mb-2 leading-none">
-                      {selectedRoute.name}
-                    </h2>
-                    <p className="text-lightGrey font-numeral text-lg uppercase tracking-wider">
-                      {selectedRoute.world}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Details */}
-                <div className="p-8 space-y-8">
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-brandWhite/5 rounded-2xl p-6 border border-brandWhite/10">
-                      <div className="flex items-center gap-2 mb-2 text-lightGrey-dark">
-                        <SvgIcon src={activityIcon} className="w-5 h-5" />
-                        <span className="text-xs font-numeral uppercase tracking-widest">
-                          Distance
-                        </span>
-                      </div>
-                      <div className="text-3xl font-display text-brandWhite">
-                        {formatDistance(selectedRoute.distance)}
-                      </div>
-                    </div>
-                    <div className="bg-brandWhite/5 rounded-2xl p-6 border border-brandWhite/10">
-                      <div className="flex items-center gap-2 mb-2 text-lightGrey-dark">
-                        <SvgIcon src={clockIcon} className="w-5 h-5" />
-                        <span className="text-xs font-numeral uppercase tracking-widest">
-                          Elevation
-                        </span>
-                      </div>
-                      <div className="text-3xl font-display text-brandWhite">
-                        {formatElevation(selectedRoute.elevation)}
-                      </div>
-                    </div>
-                    <div className="bg-brandWhite/5 rounded-2xl p-6 border border-brandWhite/10">
-                      <div className="flex items-center gap-2 mb-2 text-lightGrey-dark">
-                        <span className="text-xs font-numeral uppercase tracking-widest">
-                          Difficulty
-                        </span>
-                      </div>
-                      <div
-                        className={`text-3xl font-display ${getDifficultyConfig(selectedRoute.difficulty).textColor}`}
-                      >
-                        {getDifficultyConfig(selectedRoute.difficulty).label}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  {selectedRoute.description && (
-                    <div>
-                      <h3 className="font-heading-bold text-2xl text-brandWhite mb-4 uppercase">
-                        About This Route
-                      </h3>
-                      <p className="font-body text-lg text-lightGrey leading-relaxed">
-                        {selectedRoute.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Highlights */}
-                  {selectedRoute.highlights && (
-                    <div>
-                      <h3 className="font-heading-bold text-2xl text-brandWhite mb-4 uppercase">
-                        Route Highlights
-                      </h3>
-                      <p className="font-body text-lg text-lightGrey leading-relaxed">
-                        {selectedRoute.highlights}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Tags */}
-                  {selectedRoute.tags && selectedRoute.tags.length > 0 && (
-                    <div>
-                      <h3 className="font-heading-bold text-xl text-brandWhite mb-4 uppercase">
-                        Route Tags
-                      </h3>
-                      <div className="flex flex-wrap gap-3">
-                        {selectedRoute.tags.map(tag => (
-                          <RouteTag key={tag} label={tag} size="medium" />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Map Image */}
-                  {(selectedRoute.profileImageUrl ||
-                    selectedRoute.mapImage) && (
-                    <div className="bg-black/40 rounded-2xl p-8 border border-brandWhite/5">
-                      <h3 className="font-heading-bold text-xl text-brandWhite mb-6 uppercase">
-                        Route Map
-                      </h3>
-                      <div className="relative aspect-video">
-                        <Image
-                          src={
-                            selectedRoute.profileImageUrl ||
-                            urlFor(selectedRoute.mapImage).width(1000).url()
-                          }
-                          alt={`${selectedRoute.name} map`}
-                          fill
-                          className="object-contain"
-                          sizes="(max-width: 1000px) 100vw, 1000px"
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <SvgIcon
+                          src={pinIcon}
+                          className="w-32 h-32 text-brandWhite/10"
                         />
                       </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-darkGrey via-transparent to-transparent" />
+
+                    {/* Title Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
+                      <div className="flex items-center gap-3 mb-3">
+                        {selectedRoute.featured && (
+                          <div className="bg-brand-primary px-3 py-1.5 rounded-full flex items-center gap-2">
+                            <SvgIcon
+                              src={starIcon}
+                              className="w-4 h-4 text-white"
+                            />
+                            <span className="text-white font-display text-xs uppercase">
+                              Featured
+                            </span>
+                          </div>
+                        )}
+                        <span className="bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-brandWhite font-numeral text-sm uppercase tracking-widest">
+                          {RIDE_MODE_LABELS[selectedRoute.sportType]}
+                        </span>
+                      </div>
+                      <h2 className="font-display text-3xl md:text-5xl text-brandWhite mb-2 leading-none">
+                        {selectedRoute.name}
+                      </h2>
+                      <p className="text-lightGrey font-numeral text-lg uppercase tracking-wider">
+                        {selectedRoute.world}
+                      </p>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="p-5 md:p-8 space-y-6 md:space-y-8">
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                      <div className="bg-brandWhite/5 rounded-2xl p-4 md:p-6 border border-brandWhite/10">
+                        <div className="flex items-center gap-2 mb-2 text-lightGrey-dark">
+                          <SvgIcon src={activityIcon} className="w-5 h-5" />
+                          <span className="text-xs font-numeral uppercase tracking-widest">
+                            Distance
+                          </span>
+                        </div>
+                        <div className="text-2xl md:text-3xl font-display text-brandWhite">
+                          {formatDistance(selectedRoute.distance)}
+                        </div>
+                      </div>
+                      <div className="bg-brandWhite/5 rounded-2xl p-4 md:p-6 border border-brandWhite/10">
+                        <div className="flex items-center gap-2 mb-2 text-lightGrey-dark">
+                          <SvgIcon src={clockIcon} className="w-5 h-5" />
+                          <span className="text-xs font-numeral uppercase tracking-widest">
+                            Elevation
+                          </span>
+                        </div>
+                        <div className="text-2xl md:text-3xl font-display text-brandWhite">
+                          {formatElevation(selectedRoute.elevation)}
+                        </div>
+                      </div>
+                      <div className="col-span-2 md:col-span-1 bg-brandWhite/5 rounded-2xl p-4 md:p-6 border border-brandWhite/10">
+                        <div className="flex items-center gap-2 mb-2 text-lightGrey-dark">
+                          <span className="text-xs font-numeral uppercase tracking-widest">
+                            Difficulty
+                          </span>
+                        </div>
+                        <div
+                          className={`text-2xl md:text-3xl font-display ${getDifficultyConfig(selectedRoute.difficulty).textColor}`}
+                        >
+                          {getDifficultyConfig(selectedRoute.difficulty).label}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    {selectedRoute.description && (
+                      <div>
+                        <h3 className="font-heading-bold text-2xl text-brandWhite mb-4 uppercase">
+                          About This Route
+                        </h3>
+                        <p className="font-body text-lg text-lightGrey leading-relaxed">
+                          {selectedRoute.description}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Highlights */}
+                    {selectedRoute.highlights && (
+                      <div>
+                        <h3 className="font-heading-bold text-2xl text-brandWhite mb-4 uppercase">
+                          Route Highlights
+                        </h3>
+                        <p className="font-body text-lg text-lightGrey leading-relaxed">
+                          {selectedRoute.highlights}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Tags */}
+                    {selectedRoute.tags && selectedRoute.tags.length > 0 && (
+                      <div>
+                        <h3 className="font-heading-bold text-xl text-brandWhite mb-4 uppercase">
+                          Route Tags
+                        </h3>
+                        <div className="flex flex-wrap gap-3">
+                          {selectedRoute.tags.map(tag => (
+                            <RouteTag key={tag} label={tag} size="medium" />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Map Image */}
+                    {(selectedRoute.profileImageUrl ||
+                      selectedRoute.mapImage) && (
+                      <div className="bg-black/40 rounded-2xl p-8 border border-brandWhite/5">
+                        <h3 className="font-heading-bold text-xl text-brandWhite mb-6 uppercase">
+                          Route Map
+                        </h3>
+                        <div className="relative aspect-video">
+                          <Image
+                            src={
+                              selectedRoute.profileImageUrl ||
+                              urlFor(selectedRoute.mapImage).width(1000).url()
+                            }
+                            alt={`${selectedRoute.name} map`}
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 1000px) 100vw, 1000px"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
