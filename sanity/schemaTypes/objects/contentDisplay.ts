@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity'
+import { siteOrExternalUrl } from '../../lib/fieldHelpers'
 
 export default defineType({
   name: 'contentDisplay',
@@ -186,8 +187,10 @@ export default defineType({
             },
             {
               name: 'link',
-              title: 'External Link',
+              title: 'Link URL',
               type: 'url',
+              description: 'A site path like /us/en/routes, or a full URL',
+              validation: siteOrExternalUrl,
             },
           ],
           preview: {

@@ -323,8 +323,9 @@ export default function FeatureGrid({
 
               const sizeClass = SIZE_CLASSES[item.size] || SIZE_CLASSES.square
               // Sticker label: solid panel so titles stay legible on any artwork
+              // 'light' = light text on a dark label, 'dark' = dark text on a light label
               const labelClass =
-                item.theme === 'dark'
+                item.theme === 'light'
                   ? 'bg-brand-ink text-brandWhite'
                   : 'bg-brandWhite text-brand-ink'
 

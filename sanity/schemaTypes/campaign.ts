@@ -1,6 +1,10 @@
 import { defineField, defineType } from 'sanity'
 import { CalendarIcon, LinkIcon } from '@sanity/icons'
-import { localizedString, localizedText } from '../lib/fieldHelpers'
+import {
+  localizedString,
+  localizedText,
+  siteOrExternalUrl,
+} from '../lib/fieldHelpers'
 
 export default defineType({
   name: 'campaign',
@@ -266,7 +270,12 @@ export default defineType({
           icon: LinkIcon,
           fields: [
             { name: 'label', type: 'string', title: 'Link Label' },
-            { name: 'url', type: 'url', title: 'Destination URL' },
+            {
+              name: 'url',
+              type: 'url',
+              title: 'Destination URL',
+              validation: siteOrExternalUrl,
+            },
             {
               name: 'type',
               type: 'string',

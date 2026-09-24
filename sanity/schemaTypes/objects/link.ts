@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity'
+import { siteOrExternalUrl } from '../../lib/fieldHelpers'
 import { LinkIcon } from '@sanity/icons'
 
 export default defineType({
@@ -109,8 +110,7 @@ export default defineType({
       name: 'externalUrl',
       title: 'URL',
       type: 'url',
-      validation: Rule =>
-        Rule.uri({ scheme: ['http', 'https', 'mailto', 'tel'] }),
+      validation: siteOrExternalUrl,
       hidden: ({ parent }) => parent?.linkType !== 'external',
     }),
     defineField({

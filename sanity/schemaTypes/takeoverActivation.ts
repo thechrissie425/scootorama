@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity'
+import { siteOrExternalUrl } from '../lib/fieldHelpers'
 import { RocketIcon } from '@sanity/icons'
 
 export default defineType({
@@ -310,6 +311,9 @@ export default defineType({
               name: 'ctaUrl',
               title: 'CTA URL',
               type: 'url',
+              description:
+                'A site path like /campaigns/luau-week, or a full URL',
+              validation: siteOrExternalUrl,
               hidden: ({ parent }) => !parent?.enabled,
             },
           ],

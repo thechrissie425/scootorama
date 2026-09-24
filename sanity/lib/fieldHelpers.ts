@@ -231,3 +231,17 @@ export const localizedBlock = (
       },
     ],
   })
+
+/**
+ * Validation for link fields that accept either a site path (/us/en/routes,
+ * /campaigns/luau-week) or a full URL. Sanity's `url` type only allows
+ * absolute URLs by default.
+ */
+export const siteOrExternalUrl = (rule: any) =>
+  rule
+    .uri({ allowRelative: true, scheme: ['http', 'https', 'mailto', 'tel'] })
+    .custom((value?: string) =>
+      !value || /^(\/|#|https?:\/\/|mailto:|tel:)/i.test(value)
+        ? true
+        : 'Use a site path starting with / or a full URL (https://…)'
+    )
