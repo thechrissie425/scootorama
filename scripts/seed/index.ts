@@ -11,10 +11,10 @@
  * scripts/seed/images (Sanity de-duplicates identical uploads).
  */
 import { createClient } from '@sanity/client'
-import { createReadStream } from 'node:fs'
+import { createReadStream, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import dotenv from 'dotenv'
-import { buildDocuments, IMAGE_NAMES, imageFileName } from './content'
+import { buildDocuments, IMAGE_NAMES } from './content'
 
 dotenv.config({ path: '.env.local' })
 
@@ -38,19 +38,38 @@ const client = createClient({
 })
 
 const IMAGE_DIR = join(process.cwd(), 'scripts', 'seed', 'images')
+const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp']
+
+/**
+ * Find the file for an image name in scripts/seed/images, whatever its
+ * format, so artwork can be swapped (e.g. a transparent PNG replacing a
+ * JPG) without code changes. PNG wins if several exist.
+ */
+function resolveImageFile(name: string): string {
+  const file = IMAGE_EXTENSIONS.map(ext => `${name}${ext}`).find(f =>
+    existsSync(join(IMAGE_DIR, f))
+  )
+  if (!file) {
+    throw new Error(
+      `No image for "${name}" in scripts/seed/images (tried ${IMAGE_EXTENSIONS.join(', ')})`
+    )
+  }
+  return file
+}
 
 async function main() {
   console.log(`🛴 Seeding ${projectId}/${dataset}`)
   console.log('Uploading images…')
   const assetIds: Record<string, string> = {}
   for (const name of IMAGE_NAMES) {
+    const file = resolveImageFile(name)
     const asset = await client.assets.upload(
       'image',
-      createReadStream(join(IMAGE_DIR, imageFileName(name))),
-      { filename: imageFileName(name) }
+      createReadStream(join(IMAGE_DIR, file)),
+      { filename: file }
     )
     assetIds[name] = asset._id
-    console.log(`  🖼  ${name}`)
+    console.log(`  🖼  ${file}`)
   }
 
   const docs = buildDocuments(assetIds)

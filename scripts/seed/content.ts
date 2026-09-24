@@ -66,7 +66,10 @@ export const IMAGE_NAMES = [
   'lockup-saucer-season',
 ]
 
-/** File in scripts/seed/images for an image name (lockups are transparent PNGs) */
+/**
+ * Default file for an image name. The seed runner resolves the actual file
+ * by extension (PNG first), so replacements in other formats also work.
+ */
 export const imageFileName = (name: string) =>
   `${name}${name.startsWith('lockup-') ? '.png' : '.jpg'}`
 
