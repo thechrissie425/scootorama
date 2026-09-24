@@ -207,7 +207,7 @@ export default function CampaignContent({
                       }
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]"
+                      className="object-cover object-[92%_center] rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]"
                     />
                   )}
                   <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/70 via-transparent to-black/20" />

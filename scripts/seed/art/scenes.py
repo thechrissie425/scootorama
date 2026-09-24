@@ -341,6 +341,64 @@ def roswell():
 
 
 # ------------------------------------------------------------ home hero
+# ------------------------------------------------------------ hero art
+# Hero art is 2400x1600 (3:2, the crop the Hero block requests) and shares
+# one composition: the nav band and the left ~60% (headline, subheading, CTA)
+# stay calm and dark, characters live on the right, and the horizon sits
+# low so the Hero's bottom-anchored crop only ever trims sky. On very wide
+# windows (about 2.4:1) with a campaign banner, the nav lands around
+# y 600-760, so large props on the right stay below y ~780; anything above
+# that (garlands, small saucers, confetti) is fine to crop.
+HW, HH, HGROUND = 2400, 1600, 1290
+
+
+def calm_zones(color):
+    """Darken the copy column and the nav band so light text always reads."""
+    return ('<defs>'
+            '<linearGradient id="calm" x1="0" y1="0" x2="1" y2="0">'
+            f'<stop offset="0" stop-color="{color}" stop-opacity=".75"/><stop offset=".5" stop-color="{color}" stop-opacity=".35"/>'
+            f'<stop offset=".68" stop-color="{color}" stop-opacity="0"/></linearGradient>'
+            '<linearGradient id="navband" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0" stop-color="{color}" stop-opacity=".7"/><stop offset="1" stop-color="{color}" stop-opacity="0"/></linearGradient>'
+            '</defs>'
+            f'<rect width="{HW}" height="{HH}" fill="url(#calm)"/>'
+            f'<rect width="{HW}" height="260" fill="url(#navband)"/>')
+
+
+def hero_sky(stops, glow_at, glow_colors):
+    """Vertical gradient sky plus a radial glow around the focal point."""
+    gx, gy = glow_at
+    s = ''.join(f'<stop offset="{o_}" stop-color="{c}"/>' for o_, c in stops)
+    g1, g2 = glow_colors
+    return ('<defs>'
+            f'<linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1">{s}</linearGradient>'
+            f'<radialGradient id="glow" cx="{gx / HW}" cy="{gy / HH}" r=".55">'
+            f'<stop offset="0" stop-color="{g1}" stop-opacity=".9"/><stop offset=".35" stop-color="{g2}" stop-opacity=".45"/>'
+            f'<stop offset="1" stop-color="{g2}" stop-opacity="0"/></radialGradient>'
+            '</defs>'
+            f'<rect width="{HW}" height="{HH}" fill="url(#dusk)"/>'
+            f'<rect width="{HW}" height="{HH}" fill="url(#glow)"/>')
+
+
+def right_confetti(n, seed, cols, y_min=250, y_max=1000):
+    random.seed(seed)
+    out = ''
+    for _ in range(n):
+        x, y = random.randint(1450, 2380), random.randint(y_min, y_max)
+        rot = random.randint(0, 180)
+        out += f'<rect x="{x}" y="{y}" width="20" height="9" rx="3" fill="{random.choice(cols)}" transform="rotate({rot} {x} {y})"/>'
+    return out
+
+
+def night_stars(n, seed, x_max=2320):
+    random.seed(seed)
+    out = ''
+    for _ in range(n):
+        x, y = random.randint(80, x_max), random.randint(260, 900)
+        out += f'<circle cx="{x}" cy="{y}" r="{random.choice([3, 4, 5])}" fill="#FFF6C2" opacity="{random.choice([.5, .7, .9])}"/>'
+    return out
+
+
 def home_hero():
     """Homepage hero, composed around the overlaid content.
 
@@ -349,31 +407,13 @@ def home_hero():
     the characters live on the right, where the sun is setting. 3:2 to match
     the 2400x1600 crop the Hero block requests.
     """
-    w, h = 2400, 1600
-    ground = 1290
+    w, h, ground = HW, HH, HGROUND
     sx, sy = 1990, ground - 170  # setting sun, its base sinking into the road
-    b = ('<defs>'
-         '<linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1">'
-         '<stop offset="0" stop-color="#1E1838"/><stop offset=".45" stop-color="#4A2470"/>'
-         '<stop offset=".72" stop-color="#B8327E"/><stop offset="1" stop-color="#FF8A5C"/></linearGradient>'
-         f'<radialGradient id="glow" cx="{sx / w}" cy="{sy / h}" r=".55">'
-         '<stop offset="0" stop-color="#FFD66B" stop-opacity=".9"/><stop offset=".35" stop-color="#FF6FA8" stop-opacity=".45"/>'
-         '<stop offset="1" stop-color="#FF6FA8" stop-opacity="0"/></radialGradient>'
-         '<linearGradient id="calm" x1="0" y1="0" x2="1" y2="0">'
-         '<stop offset="0" stop-color="#1E1838" stop-opacity=".75"/><stop offset=".5" stop-color="#1E1838" stop-opacity=".35"/>'
-         '<stop offset=".68" stop-color="#1E1838" stop-opacity="0"/></linearGradient>'
-         '<linearGradient id="navband" x1="0" y1="0" x2="0" y2="1">'
-         '<stop offset="0" stop-color="#1E1838" stop-opacity=".7"/><stop offset="1" stop-color="#1E1838" stop-opacity="0"/></linearGradient>'
-         '</defs>')
-    b += f'<rect width="{w}" height="{h}" fill="url(#dusk)"/>'
-    b += f'<rect width="{w}" height="{h}" fill="url(#glow)"/>'
+    b = hero_sky([(0, '#1E1838'), (.45, '#4A2470'), (.72, '#B8327E'), (1, '#FF8A5C')],
+                 (sx, sy), ('#FFD66B', '#FF6FA8'))
     # rays fan out from the sun, faint so they read as texture, not detail
     b += f'<g opacity=".22">{sunburst(sx, sy, 1500, 30, "none", "#FFE08A", .6)}</g>'
-    # a few stars high in the dark sky, below the nav band
-    random.seed(11)
-    for _ in range(26):
-        x, y = random.randint(80, 2320), random.randint(260, 640)
-        b += f'<circle cx="{x}" cy="{y}" r="{random.choice([3, 4, 5])}" fill="#FFF6C2" opacity="{random.choice([.5, .7, .9])}"/>'
+    b += night_stars(26, 11)
     b += sun(sx, sy, 250, face=True)
     # distant hills: low-contrast silhouettes carry the horizon under the copy
     b += (f'<path d="M0,{ground} L0,{ground - 90} Q260,{ground - 190} 560,{ground - 110} Q820,{ground - 40} 1100,{ground - 130} '
@@ -398,19 +438,11 @@ def home_hero():
           f'Q{dx + 350},{ground - 30} {dx + 400},{ground - 8} Q{dx + 320},{ground - 2} {dx + 290},{ground} Z" {o(LIME)}/>'
           f'<path d="M{dx + 40},{ground - 90} Q{dx - 30},{ground - 240} {dx - 10},{ground - 330} Q{dx + 20},{ground - 362} {dx + 52},{ground - 335} '
           f'Q{dx + 30},{ground - 250} {dx + 110},{ground - 120}" {o(LIME)}/><circle cx="{dx + 8}" cy="{ground - 333}" r="8" fill="{INK}"/>')
-    # sparse confetti, right side only
-    random.seed(21)
-    cols = [PINK_L, YELLOW, TEAL_L, LIME]
-    for _ in range(34):
-        x, y = random.randint(1450, 2380), random.randint(250, 1000)
-        rot = random.randint(0, 180)
-        b += f'<rect x="{x}" y="{y}" width="20" height="9" rx="3" fill="{random.choice(cols)}" transform="rotate({rot} {x} {y})"/>'
+    b += right_confetti(34, 21, [PINK_L, YELLOW, TEAL_L, LIME])
     # muted checker road: texture under the CTA without competing with it
     b += checker_road(w, h, ground, '#2A2150', '#4B3A7A', rows=3, cols=26)
     b += scooter(2250, ground + 95, 1.0)
-    # keep the copy column and nav band calm
-    b += f'<rect width="{w}" height="{h}" fill="url(#calm)"/>'
-    b += f'<rect width="{w}" height="260" fill="url(#navband)"/>'
+    b += calm_zones('#1E1838')
     return svg(w, h, b)
 
 
@@ -480,53 +512,89 @@ SCENES = {
 
 # ------------------------------------------------------------ campaigns
 def luau_week():
-    """Luau Week key art: sunset lagoon, tiki torches, lei garland, sign."""
-    b = sky(W, H, '#FF5A36', '#FFC46B', '#FFE08A', 800, 620)
-    b += sun(800, 560, 170, '#FFD21F', face=False)
-    for i, y in enumerate(range(520, 700, 34)):
-        b += f'<rect x="{600 + i * 20}" y="{y}" width="{400 - i * 40}" height="10" rx="5" fill="#FFB36B" opacity=".7"/>'
-    b += f'<rect x="0" y="{GROUND - 60}" width="{W}" height="140" {o("#0B7A7C")}/>'
-    for i in range(7):
-        b += f'<path d="M{60 + i * 240},{GROUND - 10} q30,-18 60,0 q30,18 60,0" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity=".7"/>'
-    b += palm(140, GROUND - 40, 1.2, 40) + palm(1560, GROUND - 40, 1.1, -50)
+    """Luau Week key art: sunset over the lagoon, tiki torches, lei, sign.
+
+    Hero composition (see calm_zones): everything festive sits right.
+    """
+    w, h, ground = HW, HH, HGROUND
+    sx, sy = 1960, ground - 150
+    b = hero_sky([(0, '#0B2A3A'), (.42, '#3A2350'), (.7, '#C7361C'), (1, '#FFC46B')],
+                 (sx, sy), ('#FFE08A', '#FF5A36'))
+    b += f'<g opacity=".2">{sunburst(sx, sy, 1500, 30, "none", "#FFE08A", .6)}</g>'
+    b += sun(sx, sy, 240, '#FFD21F', face=False)
+    # lagoon, with the sun's reflection on the right only
+    lag = ground - 110
+    b += f'<rect x="-10" y="{lag}" width="{w + 20}" height="{ground - lag + 10}" {o("#0B5E60")}/>'
+    for k in range(4):
+        b += f'<rect x="{sx - 200 + k * 40}" y="{lag + 20 + k * 22}" width="{400 - k * 80}" height="10" rx="5" fill="#FFB36B" opacity=".75"/>'
+    for x in range(1500, 2400, 220):
+        b += f'<path d="M{x},{ground - 30} q30,-16 60,0 q30,16 60,0" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity=".55"/>'
     # tiki torches
-    for tx in (380, 1440):
-        b += f'<rect x="{tx - 10}" y="{GROUND - 260}" width="20" height="260" {o("#8A5A2B")}/>'
-        b += f'<rect x="{tx - 24}" y="{GROUND - 300}" width="48" height="50" rx="8" {o("#B0763A")}/>'
-        b += f'<path d="M{tx},{GROUND - 400} q-34,40 -14,92 h28 q20,-52 -14,-92 Z" {o(ORANGE)}/>'
-        b += f'<path d="M{tx},{GROUND - 360} q-14,20 -6,50 h12 q8,-30 -6,-50 Z" fill="{YELLOW}"/>'
-    # lei garland across the top
-    for i in range(34):
-        x = i * 50; y = 40 + 90 * math.sin(math.pi * i / 33)
-        b += f'<circle cx="{x}" cy="{y:.0f}" r="22" {o([PINK_L, YELLOW, "#FF5A36", PURPLE][i % 4])}/>'
+    for tx in (1420, 2330):
+        top = lag - 300
+        b += f'<rect x="{tx - 11}" y="{top + 40}" width="22" height="{ground - top - 40}" {o("#8A5A2B")}/>'
+        b += f'<rect x="{tx - 26}" y="{top}" width="52" height="54" rx="8" {o("#B0763A")}/>'
+        b += f'<path d="M{tx},{top - 104} q-36,42 -15,98 h30 q21,-56 -15,-98 Z" {o(ORANGE)}/>'
+        b += f'<path d="M{tx},{top - 62} q-15,22 -6,54 h12 q9,-32 -6,-54 Z" fill="{YELLOW}"/>'
+    b += palm(2200, lag, 1.5, -30)
+    # lei garland draped across the upper right, below the nav band
+    for i in range(22):
+        t = i / 21
+        x = 1480 + t * 940
+        y = 300 + 170 * math.sin(math.pi * t)
+        b += f'<circle cx="{x:.0f}" cy="{y:.0f}" r="24" {o([PINK_L, YELLOW, "#FF5A36", PURPLE][i % 4])}/>'
     # sign
-    b += f'<g transform="rotate(-4 1110 380)"><rect x="830" y="300" width="560" height="160" rx="30" {o("#0B3B3F")}/>'
-    b += f'<text x="1110" y="405" text-anchor="middle" font-family="Bungee, sans-serif" font-size="78" fill="{YELLOW}" stroke="{INK}" stroke-width="4" paint-order="stroke">LUAU WEEK</text></g>'
-    b += confetti(W, 600, 60, 31)
-    b += checker_road(W, H, GROUND + 80, '#FF5A36', CREAM)
-    b += scooter(1000, 815, .75, deck='#FF5A36', wheel=TEAL)
-    return svg(W, H, b)
+    b += f'<g transform="rotate(-4 1700 880)"><rect x="1480" y="810" width="450" height="130" rx="26" {o("#0B3B3F")}/>'
+    b += f'<text x="1705" y="897" text-anchor="middle" font-family="Bungee, sans-serif" font-size="62" fill="{YELLOW}" stroke="{INK}" stroke-width="4" paint-order="stroke">LUAU WEEK</text></g>'
+    b += right_confetti(34, 31, ['#FF5A36', YELLOW, TEAL_L, LIME, PINK_L], y_max=560)
+    b += checker_road(w, h, ground, '#3A1A2E', '#6B2A3A', rows=3, cols=26)
+    b += scooter(2050, ground + 95, 1.0, deck='#FF5A36', wheel=TEAL)
+    b += calm_zones('#0B2A3A')
+    return svg(w, h, b)
 
 
 def saucer_season():
-    """Saucer Season key art: neon night, a fleet of saucers, sign."""
-    b = sky(W, H, '#0D0826', '#3B1C8C', '#7CC21E', 800, 1200)
-    b += stars(W, H, 140, 9)
-    b += f'<path d="M0,{GROUND + 80} L0,540 L300,540 L360,620 L560,620 L620,{GROUND + 80} Z" {o("#2A1666")}/>'
-    b += f'<path d="M1040,{GROUND + 80} L1100,580 L1600,580 L1600,{GROUND + 80} Z" {o("#2A1666")}/>'
-    for sx, sy, sc, beam in ((560, 130, .55, False), (1110, 250, 1.0, True), (1470, 110, .6, False)):
-        g = f'<g transform="translate({sx},{sy}) scale({sc})">'
+    """Saucer Season key art: neon night, a saucer fleet beaming up a scooter.
+
+    Hero composition (see calm_zones): the fleet and sign sit right.
+    """
+    w, h, ground = HW, HH, HGROUND
+    b = hero_sky([(0, '#0D0826'), (.55, '#2A1666'), (.85, '#3B1C8C'), (1, '#4A2A9C')],
+                 (2050, ground - 100), ('#FF4FA8', '#8B5CF6'))
+    b += night_stars(70, 9)
+    # low skyline silhouettes carry the horizon under the copy
+    b += (f'<path d="M-10,{ground} L-10,{ground - 170} L260,{ground - 170} L320,{ground - 110} L620,{ground - 110} '
+          f'L660,{ground - 200} L980,{ground - 200} L1020,{ground - 120} L1300,{ground - 120} L1300,{ground} Z" '
+          f'fill="#1C0F4A" stroke="{INK}" stroke-width="{SW}"/>')
+    b += f'<path d="M1420,{ground} L1460,{ground - 260} L2410,{ground - 260} L2410,{ground} Z" {o("#2A1666")}/>'
+    # lit windows: a few warm, most dark
+    random.seed(5)
+    for wx in range(1510, 2380, 70):
+        for wy in (ground - 200, ground - 120):
+            lit = random.random() < .55
+            b += f'<rect x="{wx}" y="{wy}" width="34" height="44" rx="4" fill="{YELLOW if lit else "#1C0F4A"}" stroke="{INK}" stroke-width="4" opacity="{1 if lit else .9}"/>'
+    for wx, wy in ((80, ground - 120), (180, ground - 120), (720, ground - 150), (840, ground - 150)):
+        b += f'<rect x="{wx}" y="{wy}" width="30" height="40" rx="4" fill="#FFD21F" opacity=".45"/>'
+    b += ('<defs><linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">'
+          '<stop offset="0" stop-color="#E8FF8A" stop-opacity=".75"/><stop offset="1" stop-color="#B6FF5C" stop-opacity=".35"/>'
+          '</linearGradient></defs>')
+    fleet = ((1580, 520, .45, False), (2090, 870, .8, True), (2290, 460, .4, False))
+    for fx, fy, sc, beam in fleet:
+        g = f'<g transform="translate({fx},{fy}) scale({sc})">'
         if beam:
-            g += f'<path d="M-90,40 L-300,{(GROUND + 80 - sy) / sc} L300,{(GROUND + 80 - sy) / sc} L90,40 Z" fill="{LIME}" opacity=".3"/>'
+            g += f'<path d="M-90,40 L-260,{(ground + 90 - fy) / sc} L260,{(ground + 90 - fy) / sc} L90,40 Z" fill="url(#beam)"/>'
         g += f'<ellipse cx="0" cy="0" rx="100" ry="80" {o(TEAL_L)}/><ellipse cx="0" cy="30" rx="240" ry="60" {o("#C9CCD8")}/>'
         g += ''.join(f'<circle cx="{-180 + k * 60}" cy="36" r="14" {o([LIME, PINK_L, YELLOW][k % 3])}/>' for k in range(7))
         g += '</g>'
         b += g
-    b += f'<g transform="rotate(3 1180 560)"><rect x="860" y="480" width="640" height="160" rx="30" {o(INK)}/>'
-    b += f'<text x="1180" y="585" text-anchor="middle" font-family="Bungee, sans-serif" font-size="70" fill="{LIME}" stroke="{PINK}" stroke-width="3" paint-order="stroke">SAUCER SEASON</text></g>'
-    b += checker_road(W, H, GROUND + 80, LIME, INK)
-    b += scooter(1300, 815, .75, deck=LIME, wheel=PINK)
-    return svg(W, H, b)
+    # sign on the rooftop
+    b += f'<g transform="rotate(3 1600 960)"><rect x="1370" y="895" width="480" height="125" rx="26" {o(INK)}/>'
+    b += f'<text x="1610" y="978" text-anchor="middle" font-family="Bungee, sans-serif" font-size="50" fill="{LIME}" stroke="{PINK}" stroke-width="3" paint-order="stroke">SAUCER SEASON</text></g>'
+    b += checker_road(w, h, ground, '#160C3A', '#2E5A14', rows=3, cols=26)
+    # scooter lifting off in the beam
+    b += scooter(2220, ground + 40, 1.0, deck=LIME, wheel=PINK)
+    b += calm_zones('#0D0826')
+    return svg(w, h, b)
 
 
 def lockup(label, fill, stroke, accent):

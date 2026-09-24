@@ -152,15 +152,11 @@ export default function Hero({
             src={imageUrl}
             alt={backgroundImage?.alt || 'Hero background'}
             fill
-            className={cn(
-              'object-cover',
-              // The default art keeps its left side calm for the copy; on
-              // narrow screens, where copy spans the width, show that side.
-              // It's anchored to the bottom so short, wide windows crop
-              // empty sky rather than the road and scooter. Campaign key art
-              // is centered as designed.
-              !takeoverArt?.asset && 'object-[20%_100%] md:object-bottom'
-            )}
+            // Hero art (default and campaign) keeps its left side calm for
+            // the copy; on narrow screens, where copy spans the width, show
+            // that side. It's anchored to the bottom so short, wide windows
+            // crop empty sky rather than the road and scooter.
+            className="object-cover object-[20%_100%] md:object-bottom"
             priority={priority === 'high'}
             sizes="100vw"
             {...(blurDataURL && {
@@ -177,6 +173,8 @@ export default function Hero({
           )}
           style={overlayStyle}
         />
+        {/* Scrim behind the nav (and campaign banner), whatever the crop */}
+        <div className="absolute inset-x-0 top-0 h-[calc(var(--site-header-offset)+4rem)] bg-gradient-to-b from-brand-ink/60 to-transparent" />
       </div>
 
       {/* Content */}
