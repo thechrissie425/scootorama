@@ -174,7 +174,7 @@ export default defineType({
           ],
           preview: {
             select: {
-              title: 'title',
+              title: 'title.en',
               subtitle: 'size',
               media: 'image',
             },
@@ -247,7 +247,7 @@ export default defineType({
           ],
           preview: {
             select: {
-              title: 'content.title',
+              title: 'content.title.en',
               type: 'content._type',
               subtitle: 'size',
               media: 'content.image', // For all content types
@@ -267,7 +267,7 @@ export default defineType({
   ],
   preview: {
     select: {
-      title: 'heading',
+      title: 'heading.en',
     },
     prepare({ title }) {
       return {

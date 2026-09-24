@@ -84,7 +84,7 @@ export default defineType({
             },
           ],
           preview: {
-            select: { title: 'tabLabel', subtitle: 'content.title' },
+            select: { title: 'tabLabel', subtitle: 'content.title.en' },
           },
         },
       ],
