@@ -1,0 +1,63 @@
+name: Design Tokens Sync
+
+on:
+  push:
+    paths:
+      - 'design-tokens/**/*.json'
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync-tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Design Tokens
+        run: npm run build:tokens
+
+      - name: Check for changes
+        id: verify_diff
+        run: |
+          git diff --quiet lib/design-tokens.js lib/design-tokens.d.ts || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: steps.verify_diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore: regenerate design tokens'
+          title: '🎨 Design Tokens Update'
+          body: |
+            Automated design token regeneration triggered by changes to `design-tokens/tokens.json`.
+
+            ## Source of Truth
+            📝 **design-tokens/tokens.json** (Git = Single Source of Truth)
+
+            ## Generated Files
+            - ✅ lib/design-tokens.js
+            - ✅ lib/design-tokens.d.ts
+
+            ## Review Checklist
+            - [ ] Color changes reviewed
+            - [ ] Typography changes reviewed
+            - [ ] Token naming follows conventions
+            - [ ] No unintended breaking changes
+
+            ## Next Steps
+            After merging, the new tokens will be available in:
+            - Tailwind classes (once tailwind.config.ts is updated)
+            - Direct imports from `lib/design-tokens.js`
+          branch: design-tokens/auto-sync
+          delete-branch: true
+          labels: design-system, automated

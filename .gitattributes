@@ -1,0 +1,22 @@
+# Exclude generated/vendor files from language statistics
+*.json linguist-generated=true
+*.lock linguist-generated=true
+package-lock.json linguist-generated=true
+
+# Mark documentation
+*.md linguist-documentation=true
+
+# Ensure TypeScript is properly detected
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+
+# Ensure JavaScript is properly detected
+*.js linguist-language=JavaScript
+*.mjs linguist-language=JavaScript
+
+# Exclude node_modules and build outputs
+.next/** linguist-vendored=true
+node_modules/** linguist-vendored=true
+out/** linguist-vendored=true
+dist/** linguist-vendored=true
+build/** linguist-vendored=true

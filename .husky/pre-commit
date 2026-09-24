@@ -1,0 +1,2 @@
+npm run --silent check:brand
+npx lint-staged

@@ -1,0 +1,16 @@
+name: Brand check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  brand-leaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check for brand leaks
+        run: node scripts/check-brand-leaks.mjs

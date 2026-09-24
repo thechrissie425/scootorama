@@ -1,0 +1,75 @@
+{
+  "$comment": "Maps Figma variable collections onto design token groups. Run `npm run tokens:check` to list collection names discovered in the Figma file; add any unmapped ones here. `group` is the key path in tokens.json (dots allowed). `unit` appends a CSS unit to numeric values.",
+  "$fileKeyComment": "Set to the Figma file key of the Scootorama token library (or pass FIGMA_FILE_KEY). Leave empty until a Figma library exists.",
+  "fileKey": "",
+  "collections": {
+    "Colors": {
+      "group": "color"
+    },
+    "Color": {
+      "group": "color"
+    },
+    "Spacing": {
+      "group": "spacing",
+      "unit": "px"
+    },
+    "Radius": {
+      "group": "radius",
+      "unit": "px"
+    },
+    "Thickness": {
+      "group": "stroke",
+      "unit": "px"
+    },
+    "Typography": {
+      "group": "typography",
+      "unit": "px"
+    }
+  },
+  "ignoreCollections": ["Documentation", "Scratch"],
+  "ignoreVariables": [],
+  "$prefixesComment": "Used when importing a flat Dev Mode export (get_variable_defs), which has no collection metadata. Longest matching prefix wins; the prefix is stripped from the token path. `group` may be a dotted path. `font/family/` is ignored because the repo stores full CSS font stacks while Figma stores family names; `Space-N` is ignored as a legacy numeric duplicate of the semantic `spacing/*` scale.",
+  "prefixes": {
+    "color/": {
+      "group": "color"
+    },
+    "typography/": {
+      "group": "typography",
+      "unit": "px"
+    },
+    "font/family/": {
+      "ignore": true
+    },
+    "font/weight/": {
+      "group": "typography.fontWeight"
+    },
+    "spacing/": {
+      "group": "spacing",
+      "unit": "px"
+    },
+    "radius/": {
+      "group": "radius",
+      "unit": "px"
+    },
+    "Thickness/": {
+      "group": "stroke",
+      "unit": "px"
+    },
+    "special/": {
+      "ignore": true
+    },
+    "Space-": {
+      "ignore": true
+    }
+  },
+  "$aliasesComment": "Figma variable name -> full token path in tokens.json. Use where Figma's naming or nesting differs from the repo's. Every entry here is a naming divergence worth fixing at the source; treat this list as debt, not as design.",
+  "aliases": {
+    "color/action/primary/content/default": "color.action.primary.content",
+    "color/action/secondary/content/default": "color.action.secondary.content",
+    "color/action/tertiary/content/default": "color.action.tertiary.content",
+    "color/action/primary/stroke/default": "color.action.primary.stroke",
+    "color/action/secondary/stroke/default": "color.action.secondary.stroke",
+    "color/action/tertiary/stroke/default": "color.action.tertiary.stroke",
+    "Thickness/Hefty-Chonk": "stroke.heckinChonk"
+  }
+}
