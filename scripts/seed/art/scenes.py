@@ -342,29 +342,74 @@ def roswell():
 
 # ------------------------------------------------------------ home hero
 def home_hero():
-    w, h = 2400, 1200
-    ground = 900
-    b = sky(w, h, '#FF7FBF', '#FFE08A', '#FFFFFF', 1200, 1000)
-    b += sun(1200, 420, 170)
-    b += cloud(260, 220, 1.3) + cloud(1800, 180, 1.2) + cloud(900, 120, .7)
-    # a parade of landmarks along the horizon
-    b += palm(170, ground, 1.3, 30) + palm(420, ground, 1.0, -20)
-    b += f'<g transform="translate(560,{ground - 520}) scale(.55)">' + '</g>'
-    # mini cake tower
-    cx_, y = 700, ground
-    for w_, h_, c in [(200, 70, PINK_L), (160, 60, CREAM), (120, 55, TEAL_L), (80, 45, YELLOW)]:
+    """Homepage hero, composed around the overlaid content.
+
+    The site nav sits on the top band and the headline, subheading and CTA on
+    the left ~60%, so both stay calm and dark (light text on dark sky). All of
+    the characters live on the right, where the sun is setting. 3:2 to match
+    the 2400x1600 crop the Hero block requests.
+    """
+    w, h = 2400, 1600
+    ground = 1290
+    sx, sy = 1990, ground - 170  # setting sun, its base sinking into the road
+    b = ('<defs>'
+         '<linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1">'
+         '<stop offset="0" stop-color="#1E1838"/><stop offset=".45" stop-color="#4A2470"/>'
+         '<stop offset=".72" stop-color="#B8327E"/><stop offset="1" stop-color="#FF8A5C"/></linearGradient>'
+         f'<radialGradient id="glow" cx="{sx / w}" cy="{sy / h}" r=".55">'
+         '<stop offset="0" stop-color="#FFD66B" stop-opacity=".9"/><stop offset=".35" stop-color="#FF6FA8" stop-opacity=".45"/>'
+         '<stop offset="1" stop-color="#FF6FA8" stop-opacity="0"/></radialGradient>'
+         '<linearGradient id="calm" x1="0" y1="0" x2="1" y2="0">'
+         '<stop offset="0" stop-color="#1E1838" stop-opacity=".75"/><stop offset=".5" stop-color="#1E1838" stop-opacity=".35"/>'
+         '<stop offset=".68" stop-color="#1E1838" stop-opacity="0"/></linearGradient>'
+         '<linearGradient id="navband" x1="0" y1="0" x2="0" y2="1">'
+         '<stop offset="0" stop-color="#1E1838" stop-opacity=".7"/><stop offset="1" stop-color="#1E1838" stop-opacity="0"/></linearGradient>'
+         '</defs>')
+    b += f'<rect width="{w}" height="{h}" fill="url(#dusk)"/>'
+    b += f'<rect width="{w}" height="{h}" fill="url(#glow)"/>'
+    # rays fan out from the sun, faint so they read as texture, not detail
+    b += f'<g opacity=".22">{sunburst(sx, sy, 1500, 30, "none", "#FFE08A", .6)}</g>'
+    # a few stars high in the dark sky, below the nav band
+    random.seed(11)
+    for _ in range(26):
+        x, y = random.randint(80, 2320), random.randint(260, 640)
+        b += f'<circle cx="{x}" cy="{y}" r="{random.choice([3, 4, 5])}" fill="#FFF6C2" opacity="{random.choice([.5, .7, .9])}"/>'
+    b += sun(sx, sy, 250, face=True)
+    # distant hills: low-contrast silhouettes carry the horizon under the copy
+    b += (f'<path d="M0,{ground} L0,{ground - 90} Q260,{ground - 190} 560,{ground - 110} Q820,{ground - 40} 1100,{ground - 130} '
+          f'Q1330,{ground - 200} 1560,{ground - 90} L1560,{ground} Z" fill="#35205A" stroke="{INK}" stroke-width="{SW}"/>')
+    # landmark parade, all right of the copy column
+    # cake tower (Niagara Honeymoon Heights)
+    cx_, y = 1330, ground
+    for w_, h_, c in [(220, 80, PINK_L), (170, 70, CREAM), (125, 60, TEAL_L), (82, 50, YELLOW)]:
         y -= h_
         b += f'<rect x="{cx_ - w_ / 2}" y="{y}" width="{w_}" height="{h_}" rx="10" {o(c)}/>'
     b += f'<rect x="{cx_ - 7}" y="{y - 60}" width="14" height="60" {o(TEAL)}/><path d="M{cx_},{y - 100} q-16,20 0,38 q16,-18 0,-38 Z" {o(ORANGE)}/>'
-    # mini saucer
-    b += f'<ellipse cx="1760" cy="560" rx="70" ry="55" {o(TEAL_L)}/><ellipse cx="1760" cy="580" rx="170" ry="42" {o("#C9CCD8")}/>'
-    b += ''.join(f'<circle cx="{1640 + k * 48}" cy="584" r="10" {o([YELLOW, PINK_L, LIME][k % 3])}/>' for k in range(6))
-    # mini dino
-    b += (f'<path d="M1880,{ground} Q1900,{ground - 120} 2040,{ground - 120} Q2160,{ground - 120} 2190,{ground - 40} Q2280,{ground - 30} 2340,{ground - 10} Q2250,{ground - 5} 2200,{ground} Z" {o(LIME)}/>'
-          f'<path d="M1920,{ground - 80} Q1850,{ground - 220} 1870,{ground - 300} Q1900,{ground - 330} 1930,{ground - 305} Q1910,{ground - 230} 1990,{ground - 110}" {o(LIME)}/><circle cx="1888" cy="{ground - 303}" r="7" fill="{INK}"/>')
-    b += confetti(w, 700, 90, 21)
-    b += checker_road(w, h, ground, PINK, CREAM, rows=4, cols=30)
-    b += scooter(1330, 1110, 1.1)
+    # palms (Bora Bora Bungalow Bay)
+    b += palm(2290, ground, 1.45, -34) + palm(2120, ground, 1.05, 22)
+    # saucer with tractor beam (Roswell Saucer Speedway)
+    b += f'<path d="M1990,610 L1900,860 L2120,860 L2050,610 Z" fill="#E8FF8A" opacity=".28"/>'
+    b += f'<ellipse cx="2020" cy="560" rx="80" ry="62" {o(TEAL_L)}/><ellipse cx="2020" cy="585" rx="195" ry="48" {o("#C9CCD8")}/>'
+    b += ''.join(f'<circle cx="{1885 + k * 54}" cy="590" r="11" {o([YELLOW, PINK_L, LIME][k % 3])}/>' for k in range(6))
+    # dino peeking in (Dino Detour)
+    dx = 1500
+    b += (f'<path d="M{dx},{ground} Q{dx + 20},{ground - 130} {dx + 150},{ground - 130} Q{dx + 250},{ground - 130} {dx + 280},{ground - 45} '
+          f'Q{dx + 350},{ground - 30} {dx + 400},{ground - 8} Q{dx + 320},{ground - 2} {dx + 290},{ground} Z" {o(LIME)}/>'
+          f'<path d="M{dx + 40},{ground - 90} Q{dx - 30},{ground - 240} {dx - 10},{ground - 330} Q{dx + 20},{ground - 362} {dx + 52},{ground - 335} '
+          f'Q{dx + 30},{ground - 250} {dx + 110},{ground - 120}" {o(LIME)}/><circle cx="{dx + 8}" cy="{ground - 333}" r="8" fill="{INK}"/>')
+    # sparse confetti, right side only
+    random.seed(21)
+    cols = [PINK_L, YELLOW, TEAL_L, LIME]
+    for _ in range(34):
+        x, y = random.randint(1450, 2380), random.randint(250, 1000)
+        rot = random.randint(0, 180)
+        b += f'<rect x="{x}" y="{y}" width="20" height="9" rx="3" fill="{random.choice(cols)}" transform="rotate({rot} {x} {y})"/>'
+    # muted checker road: texture under the CTA without competing with it
+    b += checker_road(w, h, ground, '#2A2150', '#4B3A7A', rows=3, cols=26)
+    b += scooter(2250, ground + 95, 1.0)
+    # keep the copy column and nav band calm
+    b += f'<rect width="{w}" height="{h}" fill="url(#calm)"/>'
+    b += f'<rect width="{w}" height="260" fill="url(#navband)"/>'
     return svg(w, h, b)
 
 

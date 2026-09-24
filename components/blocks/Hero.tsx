@@ -152,7 +152,13 @@ export default function Hero({
             src={imageUrl}
             alt={backgroundImage?.alt || 'Hero background'}
             fill
-            className="object-cover"
+            className={cn(
+              'object-cover',
+              // The default art keeps its left side calm for the copy; on
+              // narrow screens, where copy spans the width, show that side.
+              // Campaign key art is centered as designed.
+              !takeoverArt?.asset && 'object-[20%_center] md:object-center'
+            )}
             priority={priority === 'high'}
             sizes="100vw"
             {...(blurDataURL && {
