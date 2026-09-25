@@ -49,13 +49,11 @@ export default async function RootLayout({
           <FloatingCartButton />
         </CartProvider>
 
-        {/* Sanity Live enabled only in draft mode to prevent flickering in production */}
-        {isDraftMode && (
-          <>
-            <SanityLive />
-            <VisualEditing />
-          </>
-        )}
+        {/* Always rendered: listens for published content changes and
+            revalidates cached Sanity queries, so edits go live without a
+            redeploy. Visual editing is for draft mode only. */}
+        <SanityLive />
+        {isDraftMode && <VisualEditing />}
       </body>
     </html>
   )

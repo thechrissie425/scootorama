@@ -14,7 +14,6 @@ export default async function RootMembershipPage() {
   const membershipResult = await sanityFetch({
     query: MEMBERSHIP_PAGE_QUERY,
     params: { language: languageConfig.code },
-    perspective: 'drafts',
   })
 
   if (!membershipResult.data) return notFound()
