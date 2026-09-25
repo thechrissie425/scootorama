@@ -79,7 +79,15 @@ cp .env.example .env.local
 npm run seed
 ```
 
-This uploads the illustration set and writes the homepage, site settings, products, pricing tiers, membership page, stats, quotes, FAQs and all 30 routes. Every document has a fixed ID, so re-running updates content in place.
+This uploads the illustration set and writes the homepage, site settings, products, pricing tiers, membership page, stats, quotes, FAQs and all 30 routes. Every document has a fixed ID, so re-running never duplicates content.
+
+Re-running is safe once you've edited content in the Studio: by default the seed only creates documents that don't exist yet and never modifies existing ones.
+
+| Command                    | Existing documents                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `npm run seed`             | Left untouched (only missing documents are created)                                  |
+| `npm run seed -- --update` | Refreshed from the seed, except any document holding an image uploaded in the Studio |
+| `npm run seed -- --force`  | All overwritten with seed content (a full reset)                                     |
 
 ### 4. Run it
 
@@ -97,7 +105,7 @@ npm run dev
 | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `npm run dev`                                                                       | Build design tokens, then start Next.js                          |
 | `npm run build`                                                                     | Production build (tokens first)                                  |
-| `npm run seed`                                                                      | Seed Sanity with starter content                                 |
+| `npm run seed`                                                                      | Create missing starter content in Sanity (never overwrites)      |
 | `npm run seed:art`                                                                  | Regenerate the illustration set (Python + Playwright)            |
 | `npm run storybook`                                                                 | Component workshop                                               |
 | `npm run typecheck` / `npm run lint`                                                | Static checks                                                    |
