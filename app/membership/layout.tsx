@@ -1,4 +1,3 @@
-import { SanityLive } from '@/sanity/lib/live'
 import LogoOnlyHeader from '@/components/blocks/LogoOnlyHeader'
 
 interface RootMembershipLayoutProps {
@@ -15,8 +14,6 @@ export default function RootMembershipLayout({
       <LogoOnlyHeader market="us" language="en" />
 
       {children}
-
-      <SanityLive />
     </>
   )
 }
