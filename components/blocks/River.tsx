@@ -45,7 +45,6 @@ export default function River({
   subtitle,
   items = [],
   // 👇 Receive the props from page.tsx loop
-  market = 'us',
   language = 'en',
 }: RiverProps) {
   if (!items || items.length === 0) return null
@@ -141,7 +140,7 @@ export default function River({
 
                 {/* MEDIA SIDE */}
                 <div className="flex-1 w-full relative">
-                  <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl bg-lightGrey group">
+                  <div className="relative aspect-square rounded-3xl overflow-hidden group">
                     {itemVideo?.asset && getVideoUrl(itemVideo.asset) ? (
                       <video
                         src={getVideoUrl(itemVideo.asset)}
@@ -153,21 +152,21 @@ export default function River({
                       />
                     ) : itemImage?.asset ? (
                       <Image
-                        src={urlFor(itemImage).width(1200).height(900).url()}
+                        src={urlFor(itemImage).width(1200).height(1200).url()}
                         alt={title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, 50vw"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-100 to-gray-200">
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
                         <div className="text-center">
                           <div className="text-2xl mb-2">📷</div>
                           <div className="text-sm">No Media Available</div>
                         </div>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0  pointer-events-none" />
                   </div>
                 </div>
               </motion.div>
