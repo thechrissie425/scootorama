@@ -61,6 +61,8 @@ export default function MembershipStackStory({
   const [activeSection, setActiveSection] = useState(0)
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down')
   const [isAnnual, setIsAnnual] = useState(true)
+  // Mobile: the plan bar's details sheet
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   // Market-aware formatting
   const { market: currentMarket, formatCurrency } = useMarketFormatting()
@@ -131,7 +133,7 @@ export default function MembershipStackStory({
     const observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+          if (entry.isIntersecting) {
             const sectionIndex = parseInt(
               entry.target.getAttribute('data-section') || '0'
             )
@@ -157,8 +159,12 @@ export default function MembershipStackStory({
         })
       },
       {
-        threshold: [0.6], // More precise trigger at 60% visibility
-        rootMargin: '-5% 0px', // Tighter margin for cleaner transitions
+        // A section is active while it crosses the middle of the scroller.
+        // Unlike an intersection ratio, this also works for sections taller
+        // than the screen (common on phones).
+        root: containerRef.current,
+        rootMargin: '-45% 0px -45% 0px',
+        threshold: 0,
       }
     )
 
@@ -197,6 +203,39 @@ export default function MembershipStackStory({
   if (!data || !currentPlanDetails) {
     return <div>Loading...</div>
   }
+
+  const cleanTitle = (title: string) =>
+    title
+      ?.replace(
+        /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\u{E0000}-\u{E007F}]/gu,
+        ''
+      )
+      .trim()
+  const isInCurrentPlan = (benefit: Benefit) =>
+    (benefit.availability || [])
+      .map(cleanTitle)
+      .includes(cleanTitle(currentPlanDetails.title || ''))
+
+  // Pricing for the current plan (sidebar on desktop, plan bar on mobile)
+  const pricing =
+    currentPlanDetails.prices?.find(
+      p => p.currency === currentMarket.currency.code
+    ) || currentPlanDetails.prices?.[0]
+  const monthlyPrice = pricing?.monthlyPrice || 0
+  const annualPrice =
+    pricing?.annualPrice || (monthlyPrice ? monthlyPrice * 12 * 0.8 : 0)
+  const savingsPercent =
+    pricing?.monthlyPrice && pricing?.annualPrice
+      ? Math.round(
+          ((pricing.monthlyPrice - pricing.annualPrice / 12) /
+            pricing.monthlyPrice) *
+            100
+        )
+      : 20
+  const displayPrice = isAnnual ? annualPrice : monthlyPrice
+  const planTitle =
+    getLocalizedText(currentPlanDetails.title, language) ||
+    currentPlanDetails.title
 
   // A24-style animation variants
   const sectionVariants = {
@@ -243,7 +282,7 @@ export default function MembershipStackStory({
   return (
     <div
       ref={containerRef}
-      className="dark bg-brand-ink text-brandWhite font-body relative overflow-y-scroll snap-y snap-mandatory h-screen"
+      className="dark bg-brand-ink text-brandWhite font-body relative overflow-y-scroll snap-y snap-proximity lg:snap-mandatory h-[100svh]"
     >
       {/* VISUAL FRAME BOUNDARIES */}
       <div className="fixed inset-0 pointer-events-none z-40">
@@ -257,19 +296,19 @@ export default function MembershipStackStory({
       </div>
 
       {/* NORMAL PAGE LAYOUT */}
-      <div className="grid grid-cols-12 min-h-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[100svh]">
         {/* MAIN SCROLLING CONTENT */}
-        <div className="col-span-9 relative">
+        <div className="lg:col-span-9 relative">
           {/* HERO SECTION */}
           <motion.section
-            className="min-h-screen flex-shrink-0 flex items-center justify-center text-center px-6 relative snap-start snap-always"
+            className="min-h-[100svh] flex-shrink-0 flex items-center justify-center text-center px-6 pt-20 pb-36 lg:py-0 relative snap-start snap-always"
             data-section="0"
             variants={sectionVariants}
             initial="hidden"
             animate={activeSection === 0 ? 'visible' : 'hidden'}
             custom={scrollDirection}
           >
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto w-full min-w-0">
               <motion.div
                 className="overflow-hidden py-16 relative mb-8"
                 initial={{ opacity: 0 }}
@@ -386,7 +425,7 @@ export default function MembershipStackStory({
             return (
               <motion.section
                 key={benefit._key}
-                className="min-h-screen flex-shrink-0 flex items-center px-6 snap-start snap-always"
+                className="min-h-[100svh] flex-shrink-0 flex items-center px-5 pt-24 pb-36 lg:px-6 lg:py-0 snap-start snap-always"
                 data-section={sectionIndex.toString()}
                 variants={sectionVariants}
                 initial="hidden"
@@ -394,11 +433,11 @@ export default function MembershipStackStory({
                 custom={scrollDirection}
               >
                 <div className="max-w-full mx-auto w-full">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                     {/* Content side */}
-                    <div className="space-y-8">
-                      <div className="flex items-center gap-4 mb-6">
-                        <span className="text-6xl font-display text-brandWhite/20">
+                    <div className="space-y-5 lg:space-y-8">
+                      <div className="flex flex-wrap items-center gap-3 lg:gap-4 lg:mb-6">
+                        <span className="text-4xl lg:text-6xl font-display text-brandWhite/40">
                           {String(index + 1).padStart(2, '0')}
                         </span>
                         <div className="flex items-center gap-3">
@@ -407,7 +446,7 @@ export default function MembershipStackStory({
                             className="w-6 h-6 transition-colors duration-500"
                             style={{ color: currentTheme.primary }}
                           />
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2">
                             {badges.map((badge, badgeIndex) => (
                               <Badge
                                 key={badgeIndex}
@@ -416,7 +455,7 @@ export default function MembershipStackStory({
                                     ? 'bg-brandWhite text-brand-ink'
                                     : badge.variant === 'plus'
                                       ? 'bg-brand-primary text-brandWhite'
-                                      : 'bg-brand-lime text-brandWhite'
+                                      : 'bg-brand-lime text-brand-ink'
                                 }
                               >
                                 {badge.text}
@@ -434,12 +473,12 @@ export default function MembershipStackStory({
                         </div>
                       </div>
 
-                      <h2 className="text-4xl md:text-5xl font-display leading-tight">
+                      <h2 className="text-3xl md:text-5xl font-display leading-tight">
                         {getLocalizedText(benefit.title, language)}
                       </h2>
 
                       {benefit.description && (
-                        <p className="text-lg text-lightGrey leading-relaxed max-w-lg">
+                        <p className="text-base lg:text-lg text-lightGrey leading-relaxed max-w-lg">
                           {getLocalizedText(benefit.description, language)}
                         </p>
                       )}
@@ -457,13 +496,13 @@ export default function MembershipStackStory({
                       )}
                     </div>
 
-                    {/* Visual side */}
-                    <div className="relative">
+                    {/* Visual side (first on phones, so the picture leads) */}
+                    <div className="relative order-first lg:order-none">
                       <div
-                        className={`aspect-square rounded-3xl overflow-hidden bg-darkGrey border-2 shadow-2xl transition-colors duration-500 ${
+                        className={`relative rounded-3xl overflow-hidden bg-darkGrey border-2 shadow-2xl transition-colors duration-500 ${
                           benefit.layout === 'full'
                             ? 'aspect-[21/9]'
-                            : 'aspect-square'
+                            : 'aspect-[4/3] lg:aspect-square'
                         }`}
                         style={{ borderColor: currentTheme.primary }}
                       >
@@ -485,7 +524,7 @@ export default function MembershipStackStory({
         </div>
 
         {/* SIDEBAR THAT SCROLLS WITH PAGE */}
-        <div className="col-span-3 bg-brandWhite text-brand-ink sticky top-0 h-screen">
+        <div className="hidden lg:block lg:col-span-3 bg-brandWhite text-brand-ink sticky top-0 h-[100svh]">
           <div className="p-8 flex-1 flex flex-col justify-center space-y-8 h-full">
             {/* Gas Station Rolling Plan Display */}
             <div className="flex justify-center">
@@ -522,21 +561,7 @@ export default function MembershipStackStory({
               </div>
               <div className="space-y-2">
                 {data?.benefits?.slice(0, 6).map(benefit => {
-                  const cleanTitle = (title: string) =>
-                    title
-                      ?.replace(
-                        /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\u{E0000}-\u{E007F}]/gu,
-                        ''
-                      )
-                      .trim()
-                  const cleanAvailableFor =
-                    benefit.availability?.map(cleanTitle) || []
-                  const cleanCurrentPlanTitle = cleanTitle(
-                    currentPlanDetails?.title || ''
-                  )
-                  const isAccessible = cleanAvailableFor.includes(
-                    cleanCurrentPlanTitle
-                  )
+                  const isAccessible = isInCurrentPlan(benefit)
 
                   return (
                     <div
@@ -605,28 +630,9 @@ export default function MembershipStackStory({
               </div>
               {isAnnual && (
                 <div className="text-center mt-2">
-                  {(() => {
-                    const pricing =
-                      currentPlanDetails?.prices?.find(
-                        p => p.currency === currentMarket.currency.code
-                      ) || currentPlanDetails?.prices?.[0]
-
-                    let savingsPercent = 20 // Default fallback
-                    if (pricing?.monthlyPrice && pricing?.annualPrice) {
-                      const monthlyCostOfAnnual = pricing.annualPrice / 12
-                      savingsPercent = Math.round(
-                        ((pricing.monthlyPrice - monthlyCostOfAnnual) /
-                          pricing.monthlyPrice) *
-                          100
-                      )
-                    }
-
-                    return (
-                      <span className="bg-brand-primary text-white px-2 py-1 rounded-full text-xs font-heading uppercase">
-                        {translate(language, 'save')} {savingsPercent}%
-                      </span>
-                    )
-                  })()}
+                  <span className="bg-brand-primary text-white px-2 py-1 rounded-full text-xs font-heading uppercase">
+                    {translate(language, 'save')} {savingsPercent}%
+                  </span>
                 </div>
               )}
             </div>
@@ -634,51 +640,23 @@ export default function MembershipStackStory({
             {/* 3. Pricing Widget */}
             <div>
               <div className="text-center">
-                {(() => {
-                  // Handle both old and new data structures
-                  const pricing =
-                    currentPlanDetails?.prices?.find(
-                      p => p.currency === currentMarket.currency.code
-                    ) || currentPlanDetails?.prices?.[0]
-
-                  let monthlyPrice, annualPrice
-                  if (pricing) {
-                    // New structure with prices array
-                    monthlyPrice = pricing.monthlyPrice
-                    annualPrice = pricing.annualPrice
-                  } else {
-                    // Fallback - use first price if available
-                    const fallbackPricing = currentPlanDetails?.prices?.[0]
-                    monthlyPrice = fallbackPricing?.monthlyPrice || 0
-                    annualPrice =
-                      fallbackPricing?.annualPrice ||
-                      (monthlyPrice ? monthlyPrice * 12 * 0.8 : 0)
-                  }
-
-                  if (!monthlyPrice) return <div>Loading prices...</div>
-
-                  const displayPrice = isAnnual ? annualPrice : monthlyPrice
-
-                  return (
-                    <>
-                      <div className="text-5xl font-display text-brand-ink mb-2">
-                        {formatCurrency(displayPrice)}
-                      </div>
-                      <div className="text-sm text-gray-600 font-body">
-                        {isAnnual
-                          ? translate(language, 'perYear')
-                          : translate(language, 'perMonth')}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1 capitalize font-body">
-                        {getLocalizedText(
-                          currentPlanDetails?.title,
-                          language
-                        ) || currentPlanDetails?.title}{' '}
-                        {translate(language, 'plan')}
-                      </div>
-                    </>
-                  )
-                })()}
+                {monthlyPrice ? (
+                  <>
+                    <div className="text-5xl font-display text-brand-ink mb-2">
+                      {formatCurrency(displayPrice)}
+                    </div>
+                    <div className="text-sm text-gray-600 font-body">
+                      {isAnnual
+                        ? translate(language, 'perYear')
+                        : translate(language, 'perMonth')}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1 capitalize font-body">
+                      {planTitle} {translate(language, 'plan')}
+                    </div>
+                  </>
+                ) : (
+                  <div>Loading prices...</div>
+                )}
               </div>
             </div>
 
@@ -691,6 +669,179 @@ export default function MembershipStackStory({
                 {translate(language, 'join')}
               </BrandCTAButton>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MOBILE PLAN BAR: the sidebar's job on small screens. Collapsed it
+          shows the plan, price and Join; tapping opens plan details. */}
+      <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-brand-ink">
+        <div className="overflow-hidden rounded-3xl border-[3px] border-brand-ink bg-brandWhite shadow-[5px_5px_0_0_#241E3A]">
+          <AnimatePresence initial={false}>
+            {sheetOpen && (
+              <motion.div
+                id="membership-plan-details"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <div className="max-h-[55svh] space-y-4 overflow-y-auto px-4 pt-4">
+                  {/* Plan picker */}
+                  <div
+                    role="radiogroup"
+                    aria-label="Choose a pass"
+                    className="grid grid-cols-3 gap-2"
+                  >
+                    {(['standard', 'plus', 'household'] as const).map(plan => {
+                      const selected = activePlan === plan
+                      return (
+                        <button
+                          key={plan}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => setActivePlan(plan)}
+                          className={`flex items-center justify-center gap-1.5 rounded-full border-2 border-brand-ink px-2 py-2 font-heading-bold text-xs uppercase transition-colors ${
+                            selected
+                              ? 'bg-brand-ink text-brandWhite'
+                              : 'bg-brandWhite text-brand-ink'
+                          }`}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="h-2 w-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: planTheme[plan].primary }}
+                          />
+                          {planTheme[plan].planName.replace(/ PASS$/, '')}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Billing toggle */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-1 rounded-full bg-gray-100 p-1">
+                      {[false, true].map(annual => (
+                        <button
+                          key={String(annual)}
+                          type="button"
+                          aria-pressed={isAnnual === annual}
+                          onClick={() => setIsAnnual(annual)}
+                          className={`flex-1 rounded-full px-3 py-1.5 font-heading text-xs transition-colors ${
+                            isAnnual === annual
+                              ? 'bg-gray-800 text-white'
+                              : 'text-gray-600'
+                          }`}
+                        >
+                          {translate(
+                            language,
+                            annual ? 'annually' : 'monthly'
+                          ).toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                    {isAnnual && (
+                      <span className="shrink-0 rounded-full bg-brand-primary px-2 py-1 font-heading text-xs uppercase text-white">
+                        {translate(language, 'save')} {savingsPercent}%
+                      </span>
+                    )}
+                  </div>
+
+                  {/* What's in the selected plan */}
+                  <ul className="space-y-2 pb-1">
+                    {data.benefits?.map(benefit => {
+                      const included = isInCurrentPlan(benefit)
+                      return (
+                        <li
+                          key={benefit._key}
+                          className="flex items-center justify-between gap-3 text-sm"
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span
+                              aria-hidden="true"
+                              className="h-2 w-2 shrink-0 rounded-full"
+                              style={{
+                                backgroundColor: included
+                                  ? currentTheme.primary
+                                  : '#d1d5db',
+                              }}
+                            />
+                            <span
+                              className={
+                                included ? 'text-brand-ink' : 'text-gray-500'
+                              }
+                            >
+                              {getLocalizedText(benefit.title, language)}
+                            </span>
+                          </span>
+                          {!included && (
+                            <span className="shrink-0 font-heading text-[10px] uppercase text-brand-primary">
+                              {translate(language, 'upgrade')}
+                            </span>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="flex items-center gap-3 p-3">
+            <button
+              type="button"
+              onClick={() => setSheetOpen(open => !open)}
+              aria-expanded={sheetOpen}
+              aria-controls="membership-plan-details"
+              aria-label={`${planTitle}: ${sheetOpen ? 'hide' : 'show'} plan details`}
+              className="flex min-w-0 flex-1 items-center gap-3 text-left"
+            >
+              <span
+                aria-hidden="true"
+                className="h-10 w-1.5 shrink-0 rounded-full transition-colors duration-500"
+                style={{ backgroundColor: currentTheme.primary }}
+              />
+              <span className="min-w-0">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={activePlan}
+                    initial={{ y: 12, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -12, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="block truncate font-display text-sm uppercase"
+                  >
+                    {currentTheme.planName}
+                  </motion.span>
+                </AnimatePresence>
+                <span className="block font-display text-xl leading-tight">
+                  {monthlyPrice ? formatCurrency(displayPrice) : '…'}{' '}
+                  <span className="font-body text-xs text-gray-600">
+                    {isAnnual
+                      ? translate(language, 'perYear')
+                      : translate(language, 'perMonth')}
+                  </span>
+                </span>
+              </span>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className={`ml-auto h-5 w-5 shrink-0 transition-transform ${sheetOpen ? '' : 'rotate-180'}`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            <BrandCTAButton className="w-auto shrink-0 px-6 text-lg uppercase tracking-wide">
+              {translate(language, 'join')}
+            </BrandCTAButton>
           </div>
         </div>
       </div>
