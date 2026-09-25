@@ -140,7 +140,7 @@ const textShadow = takeoverTheme?.hero?.textShadow
 
 ### Product Pages
 
-**File:** `app/[market]/[lang]/[[...slug]]/page.tsx`
+**File:** `app/[market]/[lang]/(site)/[[...slug]]/page.tsx`
 
 **Implementation:**
 
@@ -298,7 +298,7 @@ style={{
 ### 5. Pass Theme from Page Renderer
 
 ```tsx
-// app/[market]/[lang]/[[...slug]]/page.tsx
+// app/[market]/[lang]/(site)/[[...slug]]/page.tsx
 case 'yourComponent':
   return (
     <YourComponent

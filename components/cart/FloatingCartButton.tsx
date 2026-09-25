@@ -10,8 +10,11 @@ export default function FloatingCartButton() {
   const { itemCount, openCart } = useCart()
   const pathname = usePathname()
 
-  // Hide on studio routes
-  if (pathname?.startsWith('/studio')) {
+  // Hide in the Studio and in the membership flow (logo-only chrome)
+  if (
+    pathname?.startsWith('/studio') ||
+    /^(\/[a-z]{2}\/[a-z]{2})?\/membership(\/|$)/.test(pathname ?? '')
+  ) {
     return null
   }
 

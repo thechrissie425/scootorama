@@ -183,7 +183,7 @@ export const FEATUREGRID_FRAGMENT = `
 
 ### 3️⃣ Import Component
 
-**File:** `app/[market]/[lang]/[[...slug]]/page.tsx`
+**File:** `app/[market]/[lang]/(site)/[[...slug]]/page.tsx`
 
 ```typescript
 import FeatureGrid from '@/components/blocks/FeatureGrid'
@@ -198,7 +198,7 @@ const blockComponents: Record<string, React.ComponentType<any>> = {
 
 ### 4️⃣ Add to Content Query
 
-**File:** `app/[market]/[lang]/[[...slug]]/page.tsx`
+**File:** `app/[market]/[lang]/(site)/[[...slug]]/page.tsx`
 
 ```typescript
 const PAGE_QUERY = `*[_type == "page" && slug.current == $slug][0]{
@@ -509,10 +509,10 @@ npm run generate:block testimonialCarousel
 # Edit: sanity/lib/queries.ts
 
 # 6. Import and register component
-# Edit: app/[market]/[lang]/[[...slug]]/page.tsx
+# Edit: app/[market]/[lang]/(site)/[[...slug]]/page.tsx
 
 # 7. Add to content query
-# Edit: app/[market]/[lang]/[[...slug]]/page.tsx
+# Edit: app/[market]/[lang]/(site)/[[...slug]]/page.tsx
 
 # 8. Test in Sanity Studio
 npm run studio

@@ -103,7 +103,7 @@ defineField({
 **Block-Based Content System:**
 
 - `components/blocks/` contains all content blocks (Hero, River, Firecracker, etc.)
-- `app/[market]/[lang]/[[...slug]]/page.tsx` - main page renderer with block type switching
+- `app/[market]/[lang]/(site)/[[...slug]]/page.tsx` - main page renderer with block type switching
 - Each block type has corresponding GROQ fragment in `sanity/lib/queries.ts`
 
 **Key Component Pattern (see [[...slug]]/page.tsx lines 235-331):**
@@ -360,10 +360,10 @@ export async function generateMetadata({
 
 All dynamic routes have corresponding `opengraph-image.tsx` files that auto-generate branded social sharing images:
 
-- `app/[market]/[lang]/[[...slug]]/opengraph-image.tsx` (localized pages)
+- `app/[market]/[lang]/(site)/[[...slug]]/opengraph-image.tsx` (localized pages)
 - `app/products/[slug]/opengraph-image.tsx` (US products)
 - `app/blog/[slug]/opengraph-image.tsx` (US blog)
-- `app/[market]/[lang]/blog/[slug]/opengraph-image.tsx` (localized blog)
+- `app/[market]/[lang]/(site)/blog/[slug]/opengraph-image.tsx` (localized blog)
 
 **OG Image Structure:**
 
@@ -518,7 +518,7 @@ OPENAI_API_KEY (for translations)
 
 - `lib/i18n.ts` - Market/language configuration (single source of truth)
 - `sanity/lib/queries.ts` - GROQ fragments (979 lines of production queries)
-- `app/[market]/[lang]/[[...slug]]/page.tsx` - Main page renderer pattern
+- `app/[market]/[lang]/(site)/[[...slug]]/page.tsx` - Main page renderer pattern
 - `sanity.config.ts` - Singleton actions, localizable types, document actions
 
 ## Sanity Studio Specifics

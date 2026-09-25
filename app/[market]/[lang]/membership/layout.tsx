@@ -1,7 +1,4 @@
-import { sanityFetch } from '@/sanity/lib/live'
-import { SETTINGS_QUERY } from '@/sanity/lib/queries'
-import Header from '@/components/blocks/Header'
-import Footer from '@/components/blocks/Footer'
+import LogoOnlyHeader from '@/components/blocks/LogoOnlyHeader'
 
 interface MembershipLayoutProps {
   children: React.ReactNode
@@ -11,11 +8,13 @@ interface MembershipLayoutProps {
   }>
 }
 
+// The membership experience is a focused flow: no site nav or footer, just
+// the logo back to the homepage. It sits outside the (site) route group, so
+// the site header and footer don't wrap it.
 export default async function MembershipLayout({
   children,
   params,
 }: MembershipLayoutProps) {
-  // Await params for Next.js 15
   const { market, lang } = await params
 
   // Validate params to prevent object injection
@@ -32,23 +31,10 @@ export default async function MembershipLayout({
       ? lang.trim()
       : 'en'
 
-  // Fetch navigation settings
-  const { data: settings } = await sanityFetch({
-    query: SETTINGS_QUERY,
-    params: { language: safeLang },
-  })
-
   return (
     <>
-      <Header
-        navItems={settings?.mainNav}
-        market={safeMarket}
-        language={safeLang}
-      />
-
+      <LogoOnlyHeader market={safeMarket} language={safeLang} />
       {children}
-
-      <Footer market={safeMarket} language={safeLang} />
     </>
   )
 }

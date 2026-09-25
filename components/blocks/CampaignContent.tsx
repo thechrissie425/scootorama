@@ -91,7 +91,7 @@ const translate = (
 
 // Dynamic import for client component
 const FAQAccordion = dynamic(
-  () => import('@/app/[market]/[lang]/campaigns/[slug]/FAQAccordion'),
+  () => import('@/app/[market]/[lang]/(site)/campaigns/[slug]/FAQAccordion'),
   {
     ssr: false,
   }

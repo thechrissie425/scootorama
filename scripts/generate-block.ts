@@ -158,7 +158,7 @@ console.log(`          ...,`)
 console.log(`          "title": coalesce(title[$language], title.en, title),`)
 console.log(`        }\``)
 console.log(
-  `\n   3️⃣  Import component in app/[market]/[lang]/[[...slug]]/page.tsx:`
+  `\n   3️⃣  Import component in app/[market]/[lang]/(site)/[[...slug]]/page.tsx:`
 )
 console.log(
   `      import ${pascalCase} from '@/components/blocks/${pascalCase}'`

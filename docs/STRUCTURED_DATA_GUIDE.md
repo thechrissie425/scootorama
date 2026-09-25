@@ -45,7 +45,7 @@ import { StructuredData } from '@/components/StructuredData'
 
 ### 1. Campaign Pages (Product Schema)
 
-Add to `app/[market]/[lang]/campaigns/[slug]/page.tsx`:
+Add to `app/[market]/[lang]/(site)/campaigns/[slug]/page.tsx`:
 
 ```typescript
 import { StructuredData } from '@/components/StructuredData'
@@ -85,7 +85,7 @@ export default async function CampaignPage({ params }: PageProps) {
 
 ### 2. Blog Posts (Article Schema)
 
-Add to `app/[market]/[lang]/blog/[slug]/page.tsx`:
+Add to `app/[market]/[lang]/(site)/blog/[slug]/page.tsx`:
 
 ```typescript
 const articleSchema = generateArticleSchema({

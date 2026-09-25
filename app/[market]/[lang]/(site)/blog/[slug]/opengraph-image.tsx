@@ -37,7 +37,7 @@ export default async function Image({ params }: PageParams) {
 
   // Load the Bungee display font
   const fontData = await fetch(
-    new URL('../../../../../public/fonts/Bungee-Regular.woff', import.meta.url)
+    new URL('../../../../../../public/fonts/Bungee-Regular.woff', import.meta.url)
   ).then(res => res.arrayBuffer())
 
   return new ImageResponse(

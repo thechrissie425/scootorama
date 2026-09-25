@@ -1,32 +1,20 @@
-import { SanityLive, sanityFetch } from '@/sanity/lib/live'
-import { SETTINGS_QUERY } from '@/sanity/lib/queries'
-import Header from '@/components/blocks/Header'
-import Footer from '@/components/blocks/Footer'
+import { SanityLive } from '@/sanity/lib/live'
+import LogoOnlyHeader from '@/components/blocks/LogoOnlyHeader'
 
 interface RootMembershipLayoutProps {
   children: React.ReactNode
 }
 
-export default async function RootMembershipLayout({
+// The membership experience is a focused flow: no site nav or footer, just
+// the logo back to the homepage. Root-level membership serves US English.
+export default function RootMembershipLayout({
   children,
 }: RootMembershipLayoutProps) {
-  // Root-level membership serves US English content
-  const market = 'us'
-  const lang = 'en'
-
-  // Fetch navigation settings
-  const { data: settings } = await sanityFetch({
-    query: SETTINGS_QUERY,
-    params: { language: lang },
-  })
-
   return (
     <>
-      <Header navItems={settings?.mainNav} market={market} language={lang} />
+      <LogoOnlyHeader market="us" language="en" />
 
       {children}
-
-      <Footer navItems={settings?.footer} market={market} language={lang} />
 
       <SanityLive />
     </>
