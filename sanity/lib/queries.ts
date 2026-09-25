@@ -934,6 +934,7 @@ export const MEMBERSHIP_PAGE_QUERY = groq`
     _key,
     layout,
     "media": media.asset->url,
+    "mediaAspect": media.asset->metadata.dimensions.aspectRatio,
     "title": coalesce(feature->title[$language], feature->title.en, feature->title),
     "description": coalesce(feature->description[$language], feature->description.en, feature->description),
     // The Array of Tier IDs this feature is available on

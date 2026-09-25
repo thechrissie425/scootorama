@@ -31,6 +31,8 @@ interface Benefit {
   title: any // LocalizedString from Sanity
   description: any // LocalizedString from Sanity
   media: string
+  /** Width / height of the image, so its frame matches it exactly */
+  mediaAspect?: number | null
   layout: 'full' | 'half'
   availability: string[]
 }
@@ -499,18 +501,29 @@ export default function MembershipStackStory({
                     {/* Visual side (first on phones, so the picture leads) */}
                     <div className="relative order-first lg:order-none">
                       <div
-                        className={`relative rounded-3xl overflow-hidden bg-darkGrey border-2 shadow-2xl transition-colors duration-500 ${
-                          benefit.layout === 'full'
-                            ? 'aspect-[21/9]'
-                            : 'aspect-[4/3] lg:aspect-square'
+                        className={`relative mx-auto rounded-3xl overflow-hidden bg-darkGrey border-2 shadow-2xl transition-colors duration-500 ${
+                          benefit.mediaAspect
+                            ? ''
+                            : benefit.layout === 'full'
+                              ? 'aspect-[21/9]'
+                              : 'aspect-[4/3] lg:aspect-square'
                         }`}
-                        style={{ borderColor: currentTheme.primary }}
+                        style={{
+                          borderColor: currentTheme.primary,
+                          // Frame takes the image's own shape (no cropping),
+                          // capped so tall images still fit on screen
+                          ...(benefit.mediaAspect && {
+                            aspectRatio: benefit.mediaAspect,
+                            width: `min(100%, ${60 * benefit.mediaAspect}svh)`,
+                          }),
+                        }}
                       >
                         {benefit.media && (
                           <Image
                             src={benefit.media}
                             alt={getLocalizedText(benefit.title, language)}
                             fill
+                            sizes="(min-width: 1024px) 40vw, 100vw"
                             className="object-cover"
                           />
                         )}
