@@ -276,8 +276,8 @@ function PricingCards({
                 <Image
                   src={tier.heroImage}
                   alt=""
-                  width={80}
-                  height={80}
+                  width={200}
+                  height={200}
                   className="object-cover"
                 />
               </div>

@@ -50,7 +50,7 @@ export function StatsGrid({
   const labelClass = isDark ? 'text-grey' : 'text-grey-dark'
 
   return (
-    <section className={cn('py-16 md:py-24', bgClass)}>
+    <section className={cn('py-8 md:py-8', bgClass)}>
       <div className="container mx-auto px-4">
         <div
           className={cn(
